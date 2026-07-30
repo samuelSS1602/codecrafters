@@ -507,8 +507,8 @@ section { position: relative; padding: 5.5rem 0; }
   width: 96px;
   height: 96px;
   border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: linear-gradient(135deg, #34d399 0%, #15803d 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: var(--shadow-glow), var(--shadow-lg);
   transition: transform 0.4s var(--ease-spring);
 }
