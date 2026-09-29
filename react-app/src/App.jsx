@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 
 // ── ICONS ─────────────────────────────────────────────
 const ICON_PATHS = {
@@ -60,41 +60,59 @@ const SERVICES = [
 
 const GITHUB = 'https://github.com/samuelSS1602'
 
-// `github` — repo URL for each project (falls back to the profile until set).
-// `live` — deployed URL; the demo button only appears once this is filled in.
+const PROJECT_FILTERS = [
+  { id: 'all', label: 'All' },
+  { id: 'web', label: 'Web' },
+  { id: 'ai', label: 'AI' },
+  { id: 'iot', label: 'IoT' },
+]
+
+// `img` — basename in /public/projects (served as -720.webp and -1400.webp).
+// `live` — deployed URL; the live-site button only appears once this is filled in.
 const PROJECTS = [
   {
-    icon: 'car', title: 'Ride Reminder', tag: 'Dashboard', hue: '168',
-    desc: 'A smart web dashboard to track, manage, and get reminders for vehicle documents like Permit, FC, Insurance, Tax, and Green Tax.',
-    tech: ['HTML', 'CSS', 'Node.js', 'Firebase'], demo: 'Live Demo',
-    github: `${GITHUB}/RIDEREMINDER-FNL`, live: 'https://ridereminder-fnl.vercel.app',
+    id: 'spp', kind: 'web', category: 'Web / Business', title: 'Sri Padmavati Pleasants',
+    desc: 'Responsive business website with room listings, booking inquiry and contact flows, built for performance, SEO and cross-device usability.',
+    tech: ['React', 'Node.js', 'Firebase', 'GCP'],
+    live: 'https://www.sripadmavatipleasants.com/', github: `${GITHUB}/SPP`, url: 'sripadmavatipleasants.com',
   },
   {
-    icon: 'leaf', title: 'Eco Smart', tag: 'IoT', hue: '150',
-    desc: 'IoT-based Smart Garbage Vehicle Allocation System using ultrasonic & weight sensors with ESP8266, Firebase, and a live dashboard.',
-    tech: ['HTML', 'CSS', 'Node.js', 'Firebase', 'IoT'], demo: 'Live Demo', github: GITHUB,
+    id: 'lodge', kind: 'web', category: 'Web / Lodge Management', title: 'Lodge Management & Guest CRM',
+    desc: 'Centralized lodge operations dashboard for managing reservations, rooms, guests, check-ins, check-outs, billing and day-to-day operational records.',
+    tech: ['React', 'Node.js', 'Firebase', 'GCP'],
+    live: 'https://spp-admin-alpha.vercel.app/', github: `${GITHUB}/SPP-ADMIN`, url: 'spp-admin-alpha.vercel.app',
   },
   {
-    icon: 'megaphone', title: 'CampusBuzz', tag: 'Platform', hue: '262',
-    desc: 'One-stop hub for college announcements, updates, alerts, events, circulars, results, and important notices from your campus dashboard.',
-    tech: ['HTML', 'CSS', 'React.js', 'MongoDB'], demo: 'Visit Site', github: `${GITHUB}/CAMPUS-BUZZ`,
+    id: 'agri', kind: 'ai', category: 'AI / Agritech', title: 'AGRI-AI Assistant',
+    desc: 'Voice-enabled agricultural assistant combining speech, text and images with multilingual AI for crop guidance, weather information and plant-disease support.',
+    tech: ['React Native', 'FastAPI', 'MongoDB', 'AI4Bharat', 'Python'],
+    github: `${GITHUB}/AGRI-SMART`, url: 'github.com/samuelSS1602/AGRI-SMART',
   },
   {
-    icon: 'lock', title: 'Cryptix', tag: 'Security', hue: '214',
-    desc: 'A powerful encryption and decryption tool designed to protect your text, images, and files with top-level security.',
-    tech: ['Python', 'Django', 'MongoDB'], demo: 'Demo', github: GITHUB,
+    id: 'iot', kind: 'iot', category: 'IoT / Smart City', title: 'Smart Garbage Management',
+    desc: 'IoT-based monitoring and vehicle allocation concept using sensor data, Firebase and a web dashboard to improve waste collection efficiency.',
+    tech: ['React', 'Python', 'Django', 'IoT Sensors', 'ESP8266'],
+    github: GITHUB, url: 'github.com/samuelSS1602',
   },
   {
-    icon: 'bot', title: 'AI Chat Assistant', tag: 'AI', hue: '285',
-    desc: 'Intelligent chatbot with natural language processing and machine learning capabilities for customer support.',
-    tech: ['HTML', 'CSS', 'React.js', 'OpenAI'], demo: 'Try It', github: GITHUB,
+    id: 'nutri', kind: 'ai', category: 'AI / Health & Nutrition', title: 'NutriEats',
+    desc: 'Nutrition-focused food application designed to help users discover meals and make healthier food choices through a focused, accessible experience.',
+    tech: ['React', 'AI Recommendations', 'Nutrition', 'Responsive UI'],
+    github: `${GITHUB}/NUTRI-EATS`, url: 'github.com/samuelSS1602/NUTRI-EATS',
   },
   {
-    icon: 'cart', title: 'QuickPick', tag: 'E-Commerce', hue: '38',
-    desc: 'Your go-to e-commerce platform for everyday essentials, trending products, and unbeatable deals – all in one place.',
-    tech: ['HTML', 'CSS', 'Node.js', 'Firebase'], demo: 'Live Tool', github: GITHUB,
+    id: 'pricewatch', kind: 'web', category: 'Web / E-Commerce', title: 'PriceWatch',
+    desc: 'Web-based price comparison and tracking platform that compares products across stores, shows historical price trends and sends alerts when products reach a target price.',
+    tech: ['HTML', 'CSS', 'JavaScript', 'PHP', 'Node.js'],
+    github: `${GITHUB}/PRICE-WATCH`, url: 'github.com/samuelSS1602/PRICE-WATCH',
   },
-]
+  {
+    id: 'crime', kind: 'web', category: 'Web / Civic Tech', title: 'CrimeRegistry',
+    desc: 'Web-based crime reporting and complaint management system for citizen registration, online complaint filing, case tracking and police case administration.',
+    tech: ['HTML', 'CSS', 'JavaScript', 'PHP', 'MySQL'],
+    github: `${GITHUB}/CRIME-REPORTING-SYSTEM`, url: 'github.com/samuelSS1602/CRIME-REPORTING-SYSTEM',
+  },
+].map((p, i) => ({ ...p, no: String(i + 1).padStart(2, '0'), img: p.id }))
 
 const PROCESS_STEPS = [
   { num: '01', title: 'Discovery', desc: 'Understanding your goals, audience, and requirements.', icon: 'search', time: 'Day 1–2' },
@@ -233,6 +251,98 @@ function SectionHead({ label, title, accent, subtitle }) {
 
 function Stars() {
   return <span className="stars" aria-label="5 out of 5 stars">★★★★★</span>
+}
+
+function Projects({ ready }) {
+  const [filter, setFilter] = useState('all')
+  const [inView, setInView] = useState(false)
+  const [pill, setPill] = useState(null)
+  const gridRef = useRef(null)
+  const tabsRef = useRef(null)
+  const list = filter === 'all' ? PROJECTS : PROJECTS.filter(p => p.kind === filter)
+  // With an odd count the first card spans the full row so the grid never leaves a hole.
+  const hasFeature = list.length % 2 === 1
+
+  // Start the staggered entrance once the grid scrolls into view.
+  useEffect(() => {
+    if (!ready || !gridRef.current) return
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setInView(true); io.disconnect() }
+    }, { threshold: 0.05, rootMargin: '0px 0px -60px 0px' })
+    io.observe(gridRef.current)
+    return () => io.disconnect()
+  }, [ready])
+
+  // Slide the gold pill under the selected filter tab.
+  useLayoutEffect(() => {
+    const measure = () => {
+      const btn = tabsRef.current?.querySelector('[aria-selected="true"]')
+      if (btn) setPill({ width: btn.offsetWidth, transform: `translateX(${btn.offsetLeft}px)` })
+    }
+    measure()
+    document.fonts?.ready.then(measure)
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [filter])
+
+  return (
+    <>
+      <div className="project-filters-wrap" data-reveal>
+        <div className="project-filters" role="tablist" aria-label="Filter projects" ref={tabsRef}>
+          <span className="filter-pill" style={pill || { opacity: 0 }} aria-hidden="true" />
+          {PROJECT_FILTERS.map(f => (
+            <button key={f.id} role="tab" aria-selected={filter === f.id} onClick={() => setFilter(f.id)}>
+              {f.label}
+              <small>{f.id === 'all' ? PROJECTS.length : PROJECTS.filter(p => p.kind === f.id).length}</small>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className={`projects ${inView ? 'in' : ''}`} ref={gridRef}>
+        {list.map((p, i) => {
+          const featured = hasFeature && i === 0
+          return (
+            <article className={`card project ${featured ? 'featured' : ''}`} key={`${filter}-${p.id}`}
+              style={{ '--i': i }} onMouseMove={tilt} onMouseLeave={untilt}>
+              <div className="card-glow" />
+              <a className="project-media" href={p.live || p.github} target="_blank" rel="noreferrer" aria-label={`Open ${p.title}`}>
+                <div className="pw-bar"><i /><i /><i /><span>{p.url}</span></div>
+                <div className="project-shot">
+                  <img
+                    src={`/projects/${p.img}-720.webp`}
+                    srcSet={`/projects/${p.img}-720.webp 720w, /projects/${p.img}-1400.webp 1400w`}
+                    sizes={featured ? '(max-width: 900px) 100vw, 720px' : '(max-width: 680px) 100vw, 600px'}
+                    alt={`${p.title} preview`} width="1400" height="700" loading="lazy" decoding="async"
+                  />
+                  <span className="project-view"><Icon name="arrow" size={20} /></span>
+                </div>
+              </a>
+              <div className="project-body">
+                <div className="project-meta">
+                  <span className="project-no">{p.no}</span>
+                  <span className="project-cat">{p.category}</span>
+                </div>
+                <h3>{p.title}</h3>
+                <p>{p.desc}</p>
+                <div className="tags">{p.tech.map(t => <span key={t}>{t}</span>)}</div>
+                <div className="project-links">
+                  {p.live && (
+                    <a className="primary" href={p.live} target="_blank" rel="noreferrer">
+                      Live site <Icon name="arrow" size={14} />
+                    </a>
+                  )}
+                  <a className={p.live ? '' : 'primary'} href={p.github} target="_blank" rel="noreferrer">
+                    <Icon name="github" size={15} /> GitHub
+                  </a>
+                </div>
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </>
+  )
 }
 
 // ── APP ───────────────────────────────────────────────
@@ -514,41 +624,8 @@ export default function App() {
         <section className="section section-alt" id="projects">
           <div className="container">
             <SectionHead label="Selected work" title="Projects we're" accent="proud of."
-              subtitle="A curated collection of solutions we've built for real-world problems." />
-            <div className="projects">
-              {PROJECTS.map((p, i) => (
-                <article className="card project" key={i} data-reveal style={{ '--delay': `${(i % 3) * 0.1}s`, '--hue': p.hue }}
-                  onMouseMove={tilt} onMouseLeave={untilt}>
-                  <div className="card-glow" />
-                  <div className="project-preview">
-                    <div className="project-orb" />
-                    <div className="project-window">
-                      <div className="pw-bar"><i /><i /><i /></div>
-                      <div className="pw-body">
-                        <span className="pw-icon"><Icon name={p.icon} size={30} stroke={1.4} /></span>
-                        <span className="pw-line" /><span className="pw-line short" />
-                      </div>
-                    </div>
-                    <span className="project-tag">{p.tag}</span>
-                  </div>
-                  <div className="project-body">
-                    <h3>{p.title}</h3>
-                    <p>{p.desc}</p>
-                    <div className="tags">{p.tech.map(t => <span key={t}>{t}</span>)}</div>
-                    <div className="project-links">
-                      <a className="primary" href={p.github} target="_blank" rel="noreferrer">
-                        <Icon name="github" size={15} /> GitHub
-                      </a>
-                      {p.live && (
-                        <a href={p.live} target="_blank" rel="noreferrer">
-                          {p.demo} <Icon name="arrow" size={14} />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+              subtitle="Real products across web, AI and IoT — shipped, deployed and solving real-world problems." />
+            <Projects ready={!loading} />
           </div>
         </section>
 
