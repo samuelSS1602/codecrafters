@@ -577,6 +577,11 @@ body.light-mode .blob { mix-blend-mode: multiply; }
 .project.featured .project-body { justify-content: center; padding: 44px 44px 44px 40px; }
 .project.featured h3 { font-size: clamp(1.6rem, 2.6vw, 2.2rem); }
 .project.featured .project-body p { font-size: 1rem; }
+@media (min-width: 901px) {
+  .project.featured.flip { grid-template-columns: 1fr 1.4fr; }
+  .project.featured.flip .project-media { order: 2; border-right: 0; border-left: 1px solid var(--border); }
+  .project.featured.flip .project-body { padding: 44px 40px 44px 44px; }
+}
 
 .project-media {
   position: relative; display: flex; flex-direction: column; overflow: hidden;

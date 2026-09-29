@@ -83,6 +83,12 @@ const PROJECTS = [
     live: 'https://spp-admin-alpha.vercel.app/', github: `${GITHUB}/SPP-ADMIN`, url: 'spp-admin-alpha.vercel.app',
   },
   {
+    id: 'speakup', kind: 'ai', category: 'AI / EdTech', title: 'Nice SpeakUp',
+    desc: 'AI speaking coach for children aged 6–12 that builds communication and soft skills through voice-first conversations with Pip, games and learning missions — with XP, streaks and parent & teacher insights.',
+    tech: ['React', 'React Router', 'Framer Motion', 'Tailwind CSS', 'Web Speech API'],
+    live: 'https://testnice-silk.vercel.app/', url: 'testnice-silk.vercel.app',
+  },
+  {
     id: 'agri', kind: 'ai', category: 'AI / Agritech', title: 'AGRI-AI Assistant',
     desc: 'Voice-enabled agricultural assistant combining speech, text and images with multilingual AI for crop guidance, weather information and plant-disease support.',
     tech: ['React Native', 'FastAPI', 'MongoDB', 'AI4Bharat', 'Python'],
@@ -260,8 +266,10 @@ function Projects({ ready }) {
   const gridRef = useRef(null)
   const tabsRef = useRef(null)
   const list = filter === 'all' ? PROJECTS : PROJECTS.filter(p => p.kind === filter)
-  // With an odd count the first card spans the full row so the grid never leaves a hole.
-  const hasFeature = list.length % 2 === 1
+  // Full-width cards keep the 2-column grid free of holes: the first one for an odd
+  // count, first and last (mirrored) for an even count of four or more.
+  const odd = list.length % 2 === 1
+  const bookend = !odd && list.length >= 4
 
   // Start the staggered entrance once the grid scrolls into view.
   useEffect(() => {
@@ -301,9 +309,10 @@ function Projects({ ready }) {
 
       <div className={`projects ${inView ? 'in' : ''}`} ref={gridRef}>
         {list.map((p, i) => {
-          const featured = hasFeature && i === 0
+          const flip = bookend && i === list.length - 1
+          const featured = ((odd || bookend) && i === 0) || flip
           return (
-            <article className={`card project ${featured ? 'featured' : ''}`} key={`${filter}-${p.id}`}
+            <article className={`card project ${featured ? 'featured' : ''} ${flip ? 'flip' : ''}`} key={`${filter}-${p.id}`}
               style={{ '--i': i }} onMouseMove={tilt} onMouseLeave={untilt}>
               <div className="card-glow" />
               <a className="project-media" href={p.live || p.github} target="_blank" rel="noreferrer" aria-label={`Open ${p.title}`}>
@@ -332,9 +341,11 @@ function Projects({ ready }) {
                       Live site <Icon name="arrow" size={14} />
                     </a>
                   )}
-                  <a className={p.live ? '' : 'primary'} href={p.github} target="_blank" rel="noreferrer">
-                    <Icon name="github" size={15} /> GitHub
-                  </a>
+                  {p.github && (
+                    <a className={p.live ? '' : 'primary'} href={p.github} target="_blank" rel="noreferrer">
+                      <Icon name="github" size={15} /> GitHub
+                    </a>
+                  )}
                 </div>
               </div>
             </article>
