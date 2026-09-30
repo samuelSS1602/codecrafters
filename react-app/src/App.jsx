@@ -449,14 +449,25 @@ export default function App() {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }, [])
 
+  // Hand the enquiry to WhatsApp as a pre-filled chat; the visitor just taps send.
   const handleFormSubmit = useCallback((e) => {
     e.preventDefault()
+    const text = [
+      `*New project enquiry — Code Crafters*`,
+      ``,
+      `*Name:* ${formData.name}`,
+      `*Email:* ${formData.email}`,
+      `*Subject:* ${formData.subject}`,
+      ``,
+      formData.message,
+    ].join('\n')
+    window.open(`${WHATSAPP}?text=${encodeURIComponent(text)}`, '_blank', 'noopener')
     setFormSubmitted(true)
     setTimeout(() => {
       setFormSubmitted(false)
       setFormData({ name: '', email: '', subject: '', message: '' })
     }, 3500)
-  }, [])
+  }, [formData])
 
   const heroWords = ['We', 'craft', 'digital', 'experiences', 'that']
 
@@ -855,8 +866,8 @@ export default function App() {
                 {formSubmitted ? (
                   <div className="form-success">
                     <span className="success-ring"><Icon name="check" size={34} stroke={2.2} /></span>
-                    <h3>Message sent!</h3>
-                    <p>We'll get back to you within 24 hours.</p>
+                    <h3>Opening WhatsApp…</h3>
+                    <p>Your message is ready — just tap send and we'll reply within 24 hours.</p>
                   </div>
                 ) : (
                   <>
@@ -878,7 +889,7 @@ export default function App() {
                       <textarea id="message" name="message" rows="5" placeholder=" " value={formData.message} onChange={handleFormChange} required />
                       <label htmlFor="message">Tell us about your project…</label>
                     </div>
-                    <button type="submit" className="btn btn-gold btn-lg btn-block">Send message <Icon name="arrow" size={18} /></button>
+                    <button type="submit" className="btn btn-gold btn-lg btn-block"><Icon name="chat" size={18} /> Send via WhatsApp</button>
                   </>
                 )}
               </form>
