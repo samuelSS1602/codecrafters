@@ -85,7 +85,7 @@ const PROJECTS = [
   {
     id: 'speakup', kind: 'ai', category: 'AI / EdTech', title: 'Nice SpeakUp',
     desc: 'AI speaking coach for children aged 6–12 that builds communication and soft skills through voice-first conversations with Pip, games and learning missions — with XP, streaks and parent & teacher insights.',
-    tech: ['React', 'React Router', 'Framer Motion', 'Tailwind CSS', 'Web Speech API'],
+    tech: ['React', 'Vite', 'Tailwind CSS', 'Voice AI', 'Vercel'],
     live: 'https://testnice-silk.vercel.app/', url: 'testnice-silk.vercel.app',
   },
   {
@@ -117,6 +117,12 @@ const PROJECTS = [
     desc: 'Web-based crime reporting and complaint management system for citizen registration, online complaint filing, case tracking and police case administration.',
     tech: ['HTML', 'CSS', 'JavaScript', 'PHP', 'MySQL'],
     github: `${GITHUB}/CRIME-REPORTING-SYSTEM`, url: 'github.com/samuelSS1602/CRIME-REPORTING-SYSTEM',
+  },
+  {
+    id: 'portfolio', kind: 'web', category: 'Web / Portfolio', title: 'Samuel S — Developer Portfolio',
+    desc: 'Personal developer portfolio with a bold typographic hero, 3D-rendered avatar, animated skill marquees and a project showcase — built for smooth scroll animations, SEO and cross-device usability.',
+    tech: ['React', 'Vite', 'Scroll Animations', 'Responsive UI', 'Vercel'],
+    live: 'https://samuel-s.vercel.app/', url: 'samuel-s.vercel.app',
   },
 ].map((p, i) => ({ ...p, no: String(i + 1).padStart(2, '0'), img: p.id }))
 
