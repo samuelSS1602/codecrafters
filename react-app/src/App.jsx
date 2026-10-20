@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 
 // ── ICONS ─────────────────────────────────────────────
 const ICON_PATHS = {
@@ -940,6 +941,7 @@ export default function App() {
         </svg>
       </a>
       <a href="#home" className={`to-top ${scrolled ? 'show' : ''}`} aria-label="Back to top"><Icon name="arrowUp" size={18} /></a>
+      <Analytics />
     </>
   )
 }
