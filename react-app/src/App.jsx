@@ -43,6 +43,11 @@ function Icon({ name, size = 20, stroke = 1.6, className }) {
 
 // ── DATA ──────────────────────────────────────────────
 const WHATSAPP = 'https://wa.me/917200250454'
+const SINCE = 2023
+
+// WhatsApp chat with a ready-to-send message, so reaching out is a single tap.
+const waLink = (text) => `${WHATSAPP}?text=${encodeURIComponent(text)}`
+const WA_HELLO = waLink("Hi Code Crafters! I'd like to discuss a new project.")
 
 const NAV = [
   { id: 'services', label: 'Services' },
@@ -148,7 +153,7 @@ const TECH_STACK = [
 const STATS = [
   { count: 10, suffix: '+', label: 'Projects shipped' },
   { count: 15, suffix: '+', label: 'Happy clients' },
-  { count: 4, suffix: '+', label: 'Years of craft' },
+  { count: SINCE, from: 2000, label: 'Crafting since' },
   { count: 100, suffix: '%', label: 'On-time delivery' },
 ]
 
@@ -198,13 +203,15 @@ const BLOGS = [
   { title: 'The Ultimate Guide to SEO for New Websites', category: 'Marketing', date: 'Jul 10, 2025', readTime: '6 min read', hue: '262' },
 ]
 
-const CLIENT_LOGOS = ['TechVentures', 'GreenLeaf Co.', 'UrbanNest', 'DataFlow', 'CloudPeak', 'SwiftServe']
+const PROJECT_TYPES = ['Website', 'Web App', 'Mobile App', 'E-Commerce', 'AI / Automation', 'Something else']
+
+const CLIENT_LOGOS =['TechVentures', 'GreenLeaf Co.', 'UrbanNest', 'DataFlow', 'CloudPeak', 'SwiftServe']
 const ROTATING_WORDS = ['sell', 'convert', 'scale', 'delight']
 
 // ── SMALL COMPONENTS ──────────────────────────────────
-function Counter({ to, suffix }) {
+function Counter({ to, from = 0, suffix = '' }) {
   const ref = useRef(null)
-  const [val, setVal] = useState(0)
+  const [val, setVal] = useState(from)
   useEffect(() => {
     const el = ref.current
     if (!el) return
@@ -215,14 +222,14 @@ function Counter({ to, suffix }) {
       const dur = 1800
       const tick = (now) => {
         const t = Math.min((now - start) / dur, 1)
-        setVal(Math.round(to * (1 - Math.pow(1 - t, 4))))
+        setVal(Math.round(from + (to - from) * (1 - Math.pow(1 - t, 4))))
         if (t < 1) requestAnimationFrame(tick)
       }
       requestAnimationFrame(tick)
     }, { threshold: 0.6 })
     io.observe(el)
     return () => io.disconnect()
-  }, [to])
+  }, [to, from])
   return <span ref={ref}>{val}{suffix}</span>
 }
 
@@ -353,6 +360,10 @@ function Projects({ ready }) {
                       <Icon name="github" size={15} /> GitHub
                     </a>
                   )}
+                  <a className="project-cta" target="_blank" rel="noreferrer"
+                    href={waLink(`Hi Code Crafters! I saw your "${p.title}" project and I'd like something similar for my business.`)}>
+                    <Icon name="chat" size={15} /> Want one like this?
+                  </a>
                 </div>
               </div>
             </article>
@@ -468,13 +479,17 @@ export default function App() {
       ``,
       formData.message,
     ].join('\n')
-    window.open(`${WHATSAPP}?text=${encodeURIComponent(text)}`, '_blank', 'noopener')
+    window.open(waLink(text), '_blank', 'noopener')
     setFormSubmitted(true)
     setTimeout(() => {
       setFormSubmitted(false)
       setFormData({ name: '', email: '', subject: '', message: '' })
     }, 3500)
   }, [formData])
+
+  const pickProjectType = useCallback((type) => {
+    setFormData(prev => ({ ...prev, subject: type }))
+  }, [])
 
   const heroWords = ['We', 'craft', 'digital', 'experiences', 'that']
 
@@ -485,6 +500,7 @@ export default function App() {
         <div className="loader-inner">
           <img src="/logo.svg" alt="" className="loader-logo" />
           <div className="loader-brand">Code Crafters</div>
+          <div className="loader-since">Est. {SINCE}</div>
           <div className="loader-bar"><span style={{ width: progress + '%' }} /></div>
           <div className="loader-count">{String(progress).padStart(3, '0')}</div>
         </div>
@@ -532,8 +548,9 @@ export default function App() {
           <div className="container hero-inner">
             <div className="hero-copy">
               <a href="#contact" className="pill">
+                <span className="pill-since">Since {SINCE}</span>
                 <span className="pulse-dot" />
-                Now booking — limited slots this month
+                <span>Now booking — limited slots<span className="pill-extra"> this month</span></span>
                 <Icon name="arrow" size={14} />
               </a>
 
@@ -655,6 +672,25 @@ export default function App() {
             <SectionHead label="Selected work" title="Projects we're" accent="proud of."
               subtitle="Real products across web, AI and IoT — shipped, deployed and solving real-world problems." />
             <Projects ready={!loading} />
+
+            <div className="projects-cta" data-reveal>
+              <div className="projects-cta-copy">
+                <span className="eyebrow"><span className="pulse-dot" />Your project could be next</span>
+                <h3>Like what you see? <em>Let's build yours.</em></h3>
+                <p>
+                  Since {SINCE} we've shipped websites, dashboards, AI and IoT products for real businesses.
+                  Share your idea and get a free plan and quote within 24 hours.
+                </p>
+              </div>
+              <div className="projects-cta-actions">
+                <a href="#contact" className="btn btn-gold btn-lg" onMouseMove={magnet} onMouseLeave={unmagnet}>
+                  Start your project <Icon name="arrow" size={18} />
+                </a>
+                <a href={WA_HELLO} target="_blank" rel="noreferrer" className="btn btn-ghost btn-lg" onMouseMove={magnet} onMouseLeave={unmagnet}>
+                  <Icon name="chat" size={18} /> Chat on WhatsApp
+                </a>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -683,7 +719,7 @@ export default function App() {
           <div className="container stats">
             {STATS.map((s, i) => (
               <div className="stat" key={i} data-reveal style={{ '--delay': `${i * 0.1}s` }}>
-                <span className="stat-num"><Counter to={s.count} suffix={s.suffix} /></span>
+                <span className="stat-num"><Counter to={s.count} from={s.from} suffix={s.suffix} /></span>
                 <span className="stat-label">{s.label}</span>
               </div>
             ))}
@@ -750,7 +786,8 @@ export default function App() {
                       <span className="price-amount">{plan.price}</span>
                       <span className="price-period">/ {plan.period}</span>
                     </div>
-                    <a href={WHATSAPP} target="_blank" rel="noreferrer" className={`btn btn-block ${plan.popular ? 'btn-gold' : 'btn-ghost'}`}>
+                    <a href={waLink(`Hi Code Crafters! I'm interested in the ${plan.tier} plan. Can we discuss my project?`)}
+                      target="_blank" rel="noreferrer" className={`btn btn-block ${plan.popular ? 'btn-gold' : 'btn-ghost'}`}>
                       Get started <Icon name="arrow" size={16} />
                     </a>
                     <ul className="price-features">
@@ -837,7 +874,8 @@ export default function App() {
               <h2>Ready to look <em>premium</em>?</h2>
               <p>Book a free 15-minute call. We'll map out your idea, timeline and budget — no strings attached.</p>
               <div className="hero-ctas center">
-                <a href={WHATSAPP} target="_blank" rel="noreferrer" className="btn btn-gold btn-lg" onMouseMove={magnet} onMouseLeave={unmagnet}>
+                <a href={waLink("Hi Code Crafters! I'd like to book a free 15-minute call about my project.")} target="_blank" rel="noreferrer"
+                  className="btn btn-gold btn-lg" onMouseMove={magnet} onMouseLeave={unmagnet}>
                   <Icon name="chat" size={18} /> Chat on WhatsApp
                 </a>
                 <a href="#contact" className="btn btn-ghost btn-lg" onMouseMove={magnet} onMouseLeave={unmagnet}>Send a message</a>
@@ -850,13 +888,13 @@ export default function App() {
         <section className="section" id="contact">
           <div className="container">
             <SectionHead label="Get in touch" title="Start your" accent="project."
-              subtitle="Tell us about your idea and we'll get back to you within 24 hours." />
+              subtitle="Tell us about your idea and get a free plan and quote within 24 hours — no obligation." />
             <div className="contact" data-reveal>
               <div className="contact-info">
                 {[
                   { icon: 'mail', label: 'Email', value: 'codecrafters454@gmail.com', href: 'mailto:codecrafters454@gmail.com' },
                   { icon: 'call', label: 'Phone', value: '+91 72002 50454', href: 'tel:+917200250454' },
-                  { icon: 'chat', label: 'WhatsApp', value: 'Chat with us instantly', href: WHATSAPP, ext: true },
+                  { icon: 'chat', label: 'WhatsApp', value: 'Chat with us instantly', href: WA_HELLO, ext: true },
                 ].map((c, i) => (
                   <a className="contact-item" key={i} href={c.href} {...(c.ext ? { target: '_blank', rel: 'noreferrer' } : {})}>
                     <span className="contact-icon"><Icon name={c.icon} size={20} /></span>
@@ -878,6 +916,17 @@ export default function App() {
                   </div>
                 ) : (
                   <>
+                    <fieldset className="type-picker">
+                      <legend>What can we build for you?</legend>
+                      <div className="type-chips">
+                        {PROJECT_TYPES.map(t => (
+                          <button type="button" key={t} aria-pressed={formData.subject === t}
+                            className={formData.subject === t ? 'active' : ''} onClick={() => pickProjectType(t)}>
+                            {t}
+                          </button>
+                        ))}
+                      </div>
+                    </fieldset>
                     <div className="form-row">
                       <div className="field">
                         <input type="text" id="name" name="name" placeholder=" " value={formData.name} onChange={handleFormChange} required />
@@ -897,6 +946,11 @@ export default function App() {
                       <label htmlFor="message">Tell us about your project…</label>
                     </div>
                     <button type="submit" className="btn btn-gold btn-lg btn-block"><Icon name="chat" size={18} /> Send via WhatsApp</button>
+                    <ul className="form-assure">
+                      {['Free consultation', 'Reply within 24h', 'No obligation'].map(a => (
+                        <li key={a}><Icon name="check" size={14} stroke={2.4} />{a}</li>
+                      ))}
+                    </ul>
                   </>
                 )}
               </form>
@@ -910,7 +964,8 @@ export default function App() {
             <div className="footer-top">
               <div className="footer-brand">
                 <a href="#home" className="brand"><img src="/logo.svg" alt="" className="brand-logo" /><span>Code Crafters</span></a>
-                <p>Transforming ideas into reality — websites, apps & e-commerce solutions that grow your business online.</p>
+                <p>Crafting websites, apps & e-commerce solutions that grow businesses online — since {SINCE}.</p>
+                <a href="#contact" className="footer-cta">Have a project in mind? Let's talk <Icon name="arrow" size={16} /></a>
               </div>
               <div className="footer-cols">
                 <div>
@@ -920,14 +975,14 @@ export default function App() {
                 <div>
                   <h4>Contact</h4>
                   <a href="mailto:codecrafters454@gmail.com">Email</a>
-                  <a href={WHATSAPP} target="_blank" rel="noreferrer">WhatsApp</a>
+                  <a href={WA_HELLO} target="_blank" rel="noreferrer">WhatsApp</a>
                   <a href="tel:+917200250454">Call us</a>
                 </div>
               </div>
             </div>
             <div className="footer-word" aria-hidden="true">CODE CRAFTERS</div>
             <div className="footer-bottom">
-              <p>© {new Date().getFullYear()} Code Crafters. All rights reserved.</p>
+              <p>© {new Date().getFullYear()} Code Crafters · Est. {SINCE}. All rights reserved.</p>
               <p>Crafted with care in India.</p>
             </div>
           </div>
@@ -935,7 +990,7 @@ export default function App() {
       </main>
 
       {/* ====== FLOATING ACTIONS ====== */}
-      <a href={WHATSAPP} className={`wa-float ${scrolled ? 'show' : ''}`} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp">
+      <a href={WA_HELLO} className={`wa-float ${scrolled ? 'show' : ''}`} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp">
         <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
         </svg>
